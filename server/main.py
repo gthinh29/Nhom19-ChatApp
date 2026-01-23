@@ -9,12 +9,9 @@ import configparser
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from common.protocol import *
-# Các module này sẽ được tạo ở Giai đoạn 2, nhưng ta cứ import sẵn
-try:
-    from server.router import Router
-    from server.database import Database
-except ImportError:
-    print("Warning: Router or Database not found yet (Phase 1)")
+# Import chính thức (đã bỏ try-except của giai đoạn 1)
+from server.router import Router
+from server.database import Database
 
 # Load Config
 config = configparser.ConfigParser()
@@ -36,9 +33,12 @@ class ClientHandler(threading.Thread):
 
     def run(self):
         print(f"[NEW CONNECTION] {self.addr} connected.")
-        buffer = b""
         
         try:
+            # Thêm client vào danh sách quản lý của Router ngay khi kết nối
+            if self.router:
+                self.router.add_client(self)
+
             while self.running:
                 # 1. Read Header (4 bytes)
                 header_data = self.read_bytes(HEADER_SIZE)
@@ -55,8 +55,8 @@ class ClientHandler(threading.Thread):
                 # 3. Process
                 cmd, content = unpack_packet(header_data, payload_data)
                 if cmd:
-                    # Router will handle logic (Phase 2)
-                    if hasattr(self, 'router') and self.router:
+                    # Router xử lý logic chính
+                    if self.router:
                         self.router.route(self, cmd, content)
                     else:
                         print(f"[RAW RECV] {cmd}: {content[:50]}...")
@@ -92,42 +92,50 @@ class ClientHandler(threading.Thread):
                 self.conn.close()
             except:
                 pass
-        # Remove from global list (handled in Router usually)
-        if hasattr(self, 'router') and self.router:
+        # Xóa client khỏi danh sách quản lý
+        if self.router:
              self.router.remove_client(self)
         print(f"[DISCONNECT] {self.addr} closed.")
 
 def start_server():
-    # Database & Router Setup (Phase 2 placeholders)
-    db = None 
-    router = None
-    # db = Database() # Uncomment in Phase 2
-    # router = Router(db) # Uncomment in Phase 2
+    # Khởi tạo Database và Router (Đã kích hoạt)
+    print("[INIT] Connecting to Database...")
+    db = Database() 
+    
+    print("[INIT] Starting Router...")
+    router = Router(db) 
 
     # Socket Setup
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # Cho phép tái sử dụng địa chỉ port ngay khi tắt server (tránh lỗi Address already in use)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind((HOST, PORT))
     server.listen()
     
-    # SSL Context (Task 4) - Sẽ cấu hình kỹ hơn khi có Cert
+    # SSL Context Setup
     context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
     try:
         context.load_cert_chain(certfile=SSL_CERT, keyfile=SSL_KEY)
+        print("[SECURE] SSL Context loaded successfully.")
     except FileNotFoundError:
-        print("[WARNING] SSL Cert not found. Running in plain TCP mode might fail if client expects SSL.")
+        print("[WARNING] SSL Cert not found. Running in plain TCP mode (Development only).")
     
     print(f"[LISTENING] Server is listening on {HOST}:{PORT}")
 
     while True:
-        conn, addr = server.accept()
         try:
-            # Wrap socket with SSL
-            conn_ssl = context.wrap_socket(conn, server_side=True)
-            thread = ClientHandler(conn_ssl, addr, router)
-            thread.start()
-            print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1}")
+            conn, addr = server.accept()
+            # Wrap socket với SSL
+            try:
+                conn_ssl = context.wrap_socket(conn, server_side=True)
+                thread = ClientHandler(conn_ssl, addr, router)
+                thread.start()
+                print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1}")
+            except ssl.SSLError as e:
+                print(f"[SSL HANDSHAKE FAILED] {addr}: {e}")
+                conn.close()
         except Exception as e:
-            print(f"[SSL HANDSHAKE ERROR] {e}")
+            print(f"[SERVER ERROR] {e}")
 
 if __name__ == "__main__":
     start_server()
