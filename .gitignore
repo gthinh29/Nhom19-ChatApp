@@ -1,49 +1,47 @@
-# .gitignore
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# Virtual Env
+# Virtual Environments
+.venv/
 venv/
 env/
-ENV/
-
-# Database
-*.db
-*.sqlite3
-*.sqlite
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
 
 # IDE
 .vscode/
 .idea/
 *.swp
+*.swo
+*~
 
-# Logs
-*.log
+# Database & Temporary Files
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+chatapp.db
+chatapp.db-wal
+chatapp.db-shm
+
+# Upload & Cache
+server/uploads/*
+!server/uploads/.gitkeep
+server/uploads/avatars/*
+!server/uploads/avatars/.gitkeep
+client/ui/__pycache__/
+client/controllers/__pycache__/
+client/network/__pycache__/
+server/__pycache__/
+server/controllers/__pycache__/
+common/__pycache__/
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Certificate (Self-signed) - Tùy chọn, có thể bỏ ignore nếu muốn commit cert test
-# server/server.crt
-# server/server.key
+# Test & Temp
+*.log
+*.bak
+.cache/
+.pytest_cache/

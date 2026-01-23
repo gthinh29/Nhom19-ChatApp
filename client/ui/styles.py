@@ -1,91 +1,113 @@
-# client/ui/styles.py
+"""Mô-đun client\ui\styles.py - mô tả ngắn bằng tiếng Việt."""
 
-# Bảng màu (Discord Dark Theme Palette)
-COLORS = {
-    "BACKGROUND": "#313338",       # Màu nền chính (Chat area)
-    "SIDEBAR": "#2B2D31",          # Sidebar (Channel list)
-    "SERVER_LIST": "#1E1F22",      # Server list (Leftmost)
-    "INPUT_BG": "#383A40",         # Ô nhập liệu
-    "PRIMARY": "#5865F2",          # Màu tím Discord (Blurple)
-    "PRIMARY_HOVER": "#4752C4",
-    "TEXT_MAIN": "#F2F3F5",        # Trắng sáng
-    "TEXT_MUTED": "#B5BAC1",       # Xám nhạt
-    "DANGER": "#DA373C",           # Đỏ (Error/Delete)
-    "SUCCESS": "#23A559",          # Xanh lá (Online)
-    "SCROLLBAR": "#1A1B1E",
-    "SCROLLBAR_HANDLE": "#2B2D31",
-    "MESSAGE_HOVER": "#2e3035"     # Màu nền khi di chuột vào tin nhắn
-}
+# ==================== BẢNG MÀU CHÍNH ====================
+PRIMARY       = "#5865F2"   # Màu tím xanh đặc trưng
+PRIMARY_HOVER = "#4752C4"
+BG_APP        = "#313338"   # Nền chính tối
+BG_SIDEBAR    = "#2B2D31"   # Nền sidebar tối hơn chút
+BG_CARD       = "#232428"   # Nền user card
+BG_INPUT      = "#383A40"   # Nền ô nhập liệu
+TEXT_MAIN     = "#F2F3F5"   # Trắng sáng
+TEXT_SUB      = "#949BA4"   # Xám nhạt
+GREEN         = "#23A559"   # Online status
+RED           = "#DA373C"   # Logout/Error
+DIVIDER       = "#1E1F22"   # Đường kẻ
 
-# Stylesheet toàn cục (QSS)
-GLOBAL_STYLES = f"""
-    QWidget {{
-        background-color: {COLORS["BACKGROUND"]};
-        color: {COLORS["TEXT_MAIN"]};
-        font-family: 'gg sans', 'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-        font-size: 14px;
+# Màu Bong bóng chat
+ME_BUBBLE     = "#5865F2"   # Tím xanh
+THEM_BUBBLE   = "#2B2D31"   # Xám đậm (cùng màu sidebar)
+
+# --- GLOBAL STYLESHEET (Thêm Scrollbar đẹp) ---
+GLOBAL_STYLE = f"""
+    * {{ outline: none; border: none; }} 
+
+    QMainWindow, QDialog, QWidget#CentralWidget {{
+        background-color: {BG_APP};
     }}
     
-    /* --- Input Field --- */
+    QLabel, QLineEdit, QPushButton, QTextEdit, QFrame {{
+        font-family: 'Segoe UI', 'Roboto', sans-serif;
+        font-size: 14px;
+        color: {TEXT_MAIN};
+    }}
+
+    /* Input Fields */
     QLineEdit {{
-        background-color: {COLORS["INPUT_BG"]};
-        border: none;
-        padding: 12px;
-        border-radius: 8px;
-        color: {COLORS["TEXT_MAIN"]};
-        font-size: 14px;
-    }}
-    QLineEdit:focus {{
-        color: white;
-    }}
-
-    /* --- Buttons --- */
-    QPushButton {{
-        background-color: {COLORS["PRIMARY"]};
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 4px;
-        font-weight: bold;
-        font-size: 14px;
-    }}
-    QPushButton:hover {{
-        background-color: {COLORS["PRIMARY_HOVER"]};
-    }}
-    QPushButton:pressed {{
-        background-color: {COLORS["SERVER_LIST"]};
+        background-color: transparent;
+        color: {TEXT_MAIN};
+        font-size: 15px;
+        padding: 5px;
     }}
     
-    /* --- Scrollbar (Discord Style) --- */
+    /* List Widget (Members) */
+    QListWidget {{
+        background-color: transparent;
+        border: none;
+        outline: none;
+    }}
+    QListWidget::item {{
+        padding: 8px;
+        border-radius: 4px;
+        color: {TEXT_SUB};
+    }}
+    QListWidget::item:hover {{
+        background-color: {BG_INPUT};
+        color: {TEXT_MAIN};
+    }}
+
+    /* SCROLLBAR ĐẸP (Quan trọng) */
     QScrollBar:vertical {{
         border: none;
-        background: {COLORS["SIDEBAR"]};
-        width: 14px;
+        background: {BG_APP};
+        width: 10px;
         margin: 0px;
     }}
     QScrollBar::handle:vertical {{
-        background: {COLORS["SERVER_LIST"]};
-        min-height: 20px;
-        border-radius: 7px;
-        margin: 2px;
+        background: #1A1B1E;
+        min-height: 30px;
+        border-radius: 5px;
     }}
-    QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
-        height: 0px;
-    }}
+    QScrollBar::handle:vertical:hover {{ background: #404249; }}
+    QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0px; }}
+    QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{ background: none; }}
     
-    /* --- Labels --- */
-    QLabel#Title {{
-        font-size: 24px;
-        font-weight: bold;
-        color: {COLORS["TEXT_MAIN"]};
-        margin-bottom: 20px;
-    }}
-    QLabel#Error {{
-        color: {COLORS["DANGER"]};
-        font-size: 12px;
-    }}
-    QLabel#SubText {{
-        color: {COLORS["TEXT_MUTED"]};
-        font-size: 12px;
+    /* Tooltip */
+    QToolTip {{ 
+        color: #ffffff; 
+        background-color: #111214; 
+        border: 1px solid {BG_INPUT}; 
+        border-radius: 4px;
+        padding: 5px;
     }}
 """
+
+# Style cho nút bấm
+BTN_PRIMARY = f"""
+    QPushButton {{
+        background-color: {PRIMARY}; 
+        color: white; 
+        border-radius: 5px; 
+        font-weight: bold; 
+        padding: 8px 16px;
+    }}
+    QPushButton:hover {{ background-color: {PRIMARY_HOVER}; }}
+    QPushButton:pressed {{ background-color: #3C45A5; }}
+"""
+
+BTN_GHOST = f"""
+    QPushButton {{
+        background-color: transparent;
+        color: {TEXT_SUB};
+        border-radius: 4px;
+        text-align: left;
+        padding: 8px;
+        font-weight: 600;
+    }}
+    QPushButton:hover {{
+        background-color: {BG_INPUT};
+        color: {TEXT_MAIN};
+    }}
+"""
+
+BTN_PRIMARY = f"background-color: {PRIMARY}; color: white; border-radius: 3px; font-weight: bold; padding: 10px;"
+BTN_GREEN   = f"background-color: {GREEN}; color: white; border-radius: 3px; font-weight: bold; padding: 10px;"

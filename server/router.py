@@ -1,47 +1,77 @@
-from common.protocol import *
+"""Mô-đun server\router.py - mô tả ngắn bằng tiếng Việt."""
+
+from common.protocol import Protocol
 from server.controllers.auth_controller import AuthController
 from server.controllers.chat_controller import ChatController
-from datetime import datetime
 
 class Router:
-    def __init__(self, db):
-        self.db = db
-        self.clients = [] # Danh sách các client đang online
+    """Bộ định tuyến xử lý các yêu cầu từ client"""
+    
+    def __init__(self, server_context):
+        """Khởi tạo các controller xử lý"""
+        self.auth_ctrl = AuthController(server_context)
+        self.chat_ctrl = ChatController(server_context)
+
+    def dispatch(self, conn, cmd, parts, current_user):
+        """
+        Nhận lệnh từ client và chuyển tới controller thích hợp
         
-        # Khởi tạo các Controllers
-        self.auth_controller = AuthController(db)
-        self.chat_controller = ChatController(db, self)
-
-    def add_client(self, client):
-        if client not in self.clients:
-            self.clients.append(client)
-
-    def remove_client(self, client):
-        if client in self.clients:
-            self.clients.remove(client)
-
-    def route(self, client, cmd, payload):
-        """Điều hướng lệnh tới Controller phù hợp"""
+        Tham số:
+        - conn: Connection socket của client
+        - cmd: Tên lệnh (từ Protocol)
+        - parts: Dữ liệu kèm theo, được tách bằng delimiter
+        - current_user: Username của client hiện tại
+        """
         
-        # Nhóm lệnh Authentication
-        if cmd == CMD_LOGIN:
-            self.auth_controller.login(client, payload)
-        elif cmd == CMD_REGISTER:
-            self.auth_controller.register(client, payload)
+        # ==================== NHÓM LỆNH XÁC THỰC ====================
+        if cmd == Protocol.LOGIN:
+            self.auth_ctrl.handle_login(conn, parts)
+        
+        elif cmd == Protocol.REGISTER:
+            self.auth_ctrl.handle_register(conn, parts)
             
-        # Nhóm lệnh Chat
-        elif cmd == CMD_MSG:
-            self.chat_controller.handle_msg(client, payload)
-        
-        # Nhóm lệnh File (MỚI)
-        elif cmd == CMD_FILE:
-            self.chat_controller.handle_file(client, payload)
+        elif cmd == Protocol.FORGOT_PW:
+            self.auth_ctrl.handle_forgot_password(conn, parts)
             
-        # Nhóm lệnh System
-        elif cmd == CMD_PING:
-            client.send(CMD_PONG, "")
-            if hasattr(client, 'last_heartbeat'):
-                client.last_heartbeat = datetime.now()
+        elif cmd == Protocol.RESET_PASSWORD:
+            self.auth_ctrl.handle_reset_request_logged_in(conn, current_user)
+            
+        elif cmd == Protocol.CONFIRM_RESET:
+            self.auth_ctrl.handle_confirm_reset(conn, parts)
+            
+        elif cmd == Protocol.UPDATE_PROFILE:
+            self.auth_ctrl.handle_update_profile(conn, parts, current_user)
+
+        # ==================== NHÓM LỆNH CHAT ====================
+        elif cmd == Protocol.MSG:
+            self.chat_ctrl.handle_message(conn, parts)
+            
+        elif cmd == Protocol.IMAGE:
+            self.chat_ctrl.handle_image(conn, parts)
+        
+        # Xử lý yêu cầu Upload File (Gửi từ Chat Socket)
+        elif cmd == Protocol.UPLOAD_REQ:
+            self.chat_ctrl.handle_upload_request(conn, parts, current_user)
+
+        # Xử lý yêu cầu Download File (Gửi từ Chat Socket)
+        elif cmd == Protocol.DOWNLOAD_REQ:
+            self.chat_ctrl.handle_download_request(conn, parts, current_user)
+
+        # Lệnh FILE cũ (không dùng nữa)
+        elif cmd == Protocol.FILE:
+            self.chat_ctrl.handle_file(conn, parts)
+            
+        elif cmd == Protocol.GET_PENDING_FILES:
+            self.chat_ctrl.handle_get_pending_files(conn, current_user)
+            
+        elif cmd == Protocol.CANCEL_FILE:
+            self.chat_ctrl.handle_cancel_file(conn, parts, current_user)
+            
+        elif cmd == Protocol.EXPORT_CHAT:
+            self.chat_ctrl.handle_export_chat(conn, parts)
+
+        elif cmd == Protocol.HISTORY:
+            self.chat_ctrl.handle_history(conn, parts)
             
         else:
-            print(f"[ROUTER] Unknown command: {cmd}")
+            print(f"⚠️ Lệnh không xác định: {cmd}")
