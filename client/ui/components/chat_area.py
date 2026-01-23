@@ -1,17 +1,17 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QScrollArea, QLabel
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QScrollArea
 from PyQt6.QtCore import Qt
 from client.ui.styles import COLORS
+from client.ui.widgets.bubbles import MessageBubble
 
 class ChatArea(QScrollArea):
     """
-    Khu vực cuộn chứa các bong bóng chat (Message Bubbles).
+    Khu vực cuộn chứa các bong bóng chat.
     """
     def __init__(self):
         super().__init__()
         self.setWidgetResizable(True)
         self.setStyleSheet(f"background-color: {COLORS['CHAT_BG']}; border: none;")
         
-        # Container chứa tin nhắn
         self.container = QWidget()
         self.layout = QVBoxLayout(self.container)
         self.layout.setAlignment(Qt.AlignmentFlag.AlignTop)
@@ -21,26 +21,20 @@ class ChatArea(QScrollArea):
         self.setWidget(self.container)
 
     def add_message(self, sender, content, is_me=False):
-        """Thêm một tin nhắn vào giao diện (Dạng text đơn giản cho Phase 3)"""
-        # Trong Phase 4 sẽ thay bằng Bubble Widget phức tạp hơn
-        lbl = QLabel(f"{sender}: {content}")
-        lbl.setWordWrap(True)
-        lbl.setStyleSheet(f"""
-            background-color: {'#5865F2' if is_me else '#404249'};
-            color: white;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 14px;
-        """)
+        """
+        Thêm tin nhắn mới vào giao diện.
+        Tự động nhận diện nếu content là ảnh (theo quy ước tạm thời).
+        """
+        is_image = False
+        display_content = content
         
-        # Căn lề trái/phải
-        wrapper = QWidget()
-        wrapper_layout = QVBoxLayout(wrapper)
-        wrapper_layout.setContentsMargins(0,0,0,0)
-        wrapper_layout.addWidget(lbl)
-        wrapper_layout.setAlignment(Qt.AlignmentFlag.AlignRight if is_me else Qt.AlignmentFlag.AlignLeft)
+        # Quy ước: Nếu tin nhắn bắt đầu bằng [IMAGE] thì phần sau là Base64
+        if content.startswith("[IMAGE]"):
+            is_image = True
+            display_content = content.replace("[IMAGE]", "") 
+
+        bubble = MessageBubble(sender, display_content, is_me, is_image)
+        self.layout.addWidget(bubble)
         
-        self.layout.addWidget(wrapper)
-        
-        # Tự động cuộn xuống dưới
+        # Tự động cuộn xuống dưới cùng
         self.verticalScrollBar().setValue(self.verticalScrollBar().maximum())
