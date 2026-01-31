@@ -1,4 +1,4 @@
-"""Mô-đun client\ui\icon_factory.py - mô tả ngắn bằng tiếng Việt."""
+
 
 from PyQt6.QtGui import QIcon, QPixmap, QPainter, QPainterPath, QColor, QPen, QBrush
 from PyQt6.QtCore import Qt, QRectF

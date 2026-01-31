@@ -1,4 +1,4 @@
-"""Mô-đun server\controllers\chat_controller.py - mô tả ngắn bằng tiếng Việt."""
+
 
 from common.protocol import Protocol
 import time

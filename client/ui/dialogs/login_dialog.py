@@ -1,5 +1,3 @@
-"""Mô-đun client\ui\dialogs\login_dialog.py - mô tả ngắn bằng tiếng Việt."""
-
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QLineEdit, QPushButton, QLabel, 
                              QTabWidget, QMessageBox, QFrame, QGraphicsDropShadowEffect, QStackedWidget)
 from PyQt6.QtCore import Qt

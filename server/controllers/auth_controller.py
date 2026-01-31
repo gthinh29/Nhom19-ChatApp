@@ -1,4 +1,4 @@
-"""Mô-đun server\controllers\auth_controller.py - mô tả ngắn bằng tiếng Việt."""
+
 
 import time
 import os

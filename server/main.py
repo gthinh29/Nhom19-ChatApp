@@ -1,5 +1,3 @@
-"""Mô-đun server\main.py - mô tả ngắn bằng tiếng Việt."""
-
 import socket
 import threading
 import ssl
@@ -12,7 +10,6 @@ import base64
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-# ==================== SETUP ĐƯỜNG DẪN ====================
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
@@ -22,10 +19,7 @@ from server.database import Database
 from server.router import Router
 
 class ChatServer:
-    """Server Chat chính - quản lý kết nối SSL, xử lý tin nhắn, lưu trữ dữ liệu"""
-    
     def __init__(self):
-        """Khởi tạo Server: cấu hình SSL, khởi tạo Database, tạo các socket"""
         from dotenv import load_dotenv
         load_dotenv(os.path.join(current_dir, '.env'))
         
@@ -40,9 +34,7 @@ class ChatServer:
         os.makedirs(self.AVATAR_DIR, exist_ok=True)
         os.makedirs(self.FILE_DIR, exist_ok=True)
 
-        self.MAX_FILE_SIZE = 4 * 1024 * 1024 * 1024 
-
-        # ==================== CẤU HÌNH SSL/TLS ====================
+        self.MAX_FILE_SIZE = 4 * 1024 * 1024 * 1024
         self.context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
         try:
             self.context.load_cert_chain(
@@ -52,8 +44,6 @@ class ChatServer:
         except Exception as e:
             print(f"[CRITICAL] SSL Config Error: {e}")
             sys.exit(1)
-
-        # ==================== SOCKETS ====================
         self.raw_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.raw_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         try:
@@ -65,12 +55,8 @@ class ChatServer:
         
         self.udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-
-        # ==================== COMPONENTS ====================
         self.db = Database()
         self.router = Router(self)
-
-        # ==================== STATE MANAGEMENT ====================
         self.clients = {}
         self.online_map = {}
         self.user_sessions = {}
@@ -138,7 +124,6 @@ class ChatServer:
 
                 with open(path, "rb") as f: file_data = f.read()
                 
-                # Kiểm tra định dạng file (đơn giản hóa)
                 if not (file_data.startswith(b'\x89PNG\r\n\x1a\n') or file_data.startswith(b'\xff\xd8\xff')): pass 
 
                 b64 = base64.b64encode(file_data).decode('utf-8')
@@ -197,7 +182,6 @@ class ChatServer:
             conn.close()
 
     def handle_data_stream(self, conn, addr, token):
-        """Xử lý luồng UPLOAD file [RESUME SUPPORT]"""
         print(f"🚀 [UPLOAD] Starting upload stream for token: {token}")
         
         upload_info = self.pending_uploads.get(token)
@@ -209,13 +193,8 @@ class ChatServer:
         filename = upload_info['filename']
         total_size = upload_info['total_size']
         file_id = upload_info['file_id']
-        
-        # Lấy thông tin tiếp tục (resume)
         temp_path = upload_info.get('temp_path')
         offset = upload_info.get('offset', 0)
-        
-        # Đường dẫn file tạm và cuối cùng
-        # Logic: Lưu tạm vào temp_path, khi xong mới rename sang final path
         if not temp_path:
             safe_filename = os.path.basename(filename)
             temp_path = os.path.join(self.FILE_DIR, f"temp_{username}_{safe_filename}.part")
@@ -225,8 +204,6 @@ class ChatServer:
         try:
             self.send_packet(conn, "READY")
             print(f"📥 [UPLOAD] Receiving {filename} from byte {offset}...")
-
-            # Mở file với chế độ append nếu resume, ngược lại ghi đè
             mode = 'ab' if offset > 0 else 'wb'
             
             with open(temp_path, mode) as f:
@@ -238,17 +215,14 @@ class ChatServer:
                     received_bytes += len(chunk)
             
             print(f"✅ [UPLOAD] Transfer complete: {filename}")
-            
-            # Đổi tên file tạm: timestamp_filename (tránh trùng)
-            final_filename = f"{int(time.time())}_{filename}"
+            # filename đã có timestamp từ chat_controller, không cần thêm nữa
+            final_filename = filename
             final_path = os.path.join(self.FILE_DIR, final_filename)
             
             if os.path.exists(final_path): os.remove(final_path)
             os.rename(temp_path, final_path)
             
             self.db.complete_file_transfer(username, file_id)
-            
-            # Broadcast
             msg_content = f"[FILE]:{final_filename}|" 
             self.db.save_message(username, msg_content, msg_type="file")
             
@@ -264,12 +238,10 @@ class ChatServer:
 
         except Exception as e:
             print(f"❌ [UPLOAD ERROR] {e}")
-            # Không xóa file tạm khi lỗi để lần sau resume tiếp 
         finally:
             conn.close()
 
     def handle_download_stream(self, conn, addr, token):
-        """Xử lý luồng DOWNLOAD file với hỗ trợ tiếp tục"""
         print(f"🚀 [DOWNLOAD] Starting download stream for token: {token}")
         
         download_info = self.pending_downloads.get(token)
@@ -284,13 +256,10 @@ class ChatServer:
             
         try:
             file_size = os.path.getsize(file_path)
-            sent_bytes = offset # Bắt đầu tính từ offset
-            chunk_size = 65536 
-            
-            print(f"📤 [DOWNLOAD] Tiếp tục tải {os.path.basename(file_path)} từ {offset}/{file_size}...")
-            
+            sent_bytes = offset
+            chunk_size = 65536
+            print(f"📤 [DOWNLOAD] Continuing download {os.path.basename(file_path)} from {offset}/{file_size}...")
             with open(file_path, "rb") as f:
-                # Seek đến vị trí offset
                 if offset > 0:
                     f.seek(offset)
                 

@@ -1,4 +1,4 @@
-"""Vùng chat hiển thị tin nhắn và quản lý bong bóng (ChatArea)."""
+
 
 import re 
 from PyQt6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QScrollArea, QWidget, QPushButton
@@ -157,9 +157,9 @@ class ChatArea(QFrame):
                 if clean_name in self.pending_file_bubbles:
                     print(f"[UI] Matching Server response for: {server_fname}")
                     bubble_widget = self.pending_file_bubbles.pop(clean_name)
+                    # Cập nhật filename và content để download hoạt động đúng
                     bubble_widget.data['filename'] = server_fname
-                    if hasattr(bubble_widget, 'refresh_ui'):
-                        bubble_widget.refresh_ui()
+                    bubble_widget.data['content'] = f"[FILE]:{server_fname}|"
                     self.processed_local_files.add(clean_name)
                     return
 
@@ -184,6 +184,15 @@ class ChatArea(QFrame):
 
                 # 3. Smart Swap: Xóa bong bóng loading cũ (nếu tồn tại tên raw)
                 self.remove_upload_bubble(server_fname)
+                
+                # 4. Nếu server broadcast đến trước khi on_upload_complete_local được gọi
+                # Tạo bong bóng và đánh dấu đã xử lý để tránh duplicate
+                self._enrich_user_data(data)
+                b = MessageBubble(data, self)
+                self.processed_local_files.add(clean_name)
+                self.mlay.addWidget(b)
+                QTimer.singleShot(100, self._safe_scroll_to_bottom)
+                return
                     
         except Exception as e: print(f"[UI ERROR] add_bubble: {e}")
         

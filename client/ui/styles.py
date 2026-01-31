@@ -1,5 +1,3 @@
-"""Mô-đun client\ui\styles.py - mô tả ngắn bằng tiếng Việt."""
-
 # ==================== BẢNG MÀU CHÍNH ====================
 PRIMARY       = "#5865F2"   # Màu tím xanh đặc trưng
 PRIMARY_HOVER = "#4752C4"

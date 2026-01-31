@@ -1,4 +1,4 @@
-"""Giao diện chính (MainWindow) và điều phối các thành phần UI."""
+
 
 from PyQt6.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QMessageBox, QFileDialog, QApplication
 from PyQt6.QtGui import QImage

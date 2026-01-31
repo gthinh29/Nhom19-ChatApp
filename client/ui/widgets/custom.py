@@ -1,4 +1,4 @@
-"""Mô-đun client\ui\widgets\custom.py - mô tả ngắn bằng tiếng Việt."""
+
 
 import base64
 from PyQt6.QtWidgets import QLabel, QFrame, QVBoxLayout, QHBoxLayout, QPushButton, QProgressBar

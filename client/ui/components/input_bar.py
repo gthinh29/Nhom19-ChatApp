@@ -1,4 +1,4 @@
-"""Mô-đun client\ui\components\input_bar.py - mô tả ngắn bằng tiếng Việt."""
+
 
 import os
 from PyQt6.QtWidgets import QFrame, QHBoxLayout, QLineEdit, QPushButton, QProgressBar, QDialog

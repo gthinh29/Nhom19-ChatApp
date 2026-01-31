@@ -1,4 +1,4 @@
-"""Mô-đun server\generate_cert.py - mô tả ngắn bằng tiếng Việt."""
+
 
 import subprocess
 import os

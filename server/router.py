@@ -1,4 +1,4 @@
-"""Mô-đun server\router.py - mô tả ngắn bằng tiếng Việt."""
+
 
 from common.protocol import Protocol
 from server.controllers.auth_controller import AuthController

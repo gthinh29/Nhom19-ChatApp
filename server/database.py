@@ -1,4 +1,4 @@
-"""Mô-đun server\database.py - mô tả ngắn bằng tiếng Việt."""
+
 
 import sqlite3
 import hashlib

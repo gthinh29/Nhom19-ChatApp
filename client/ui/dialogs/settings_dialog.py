@@ -1,4 +1,4 @@
-"""Mô-đun client\ui\dialogs\settings_dialog.py - mô tả ngắn bằng tiếng Việt."""
+
 
 import base64
 from PyQt6.QtWidgets import (QDialog, QWidget, QVBoxLayout, QHBoxLayout, QLabel, 

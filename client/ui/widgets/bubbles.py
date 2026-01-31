@@ -1,4 +1,4 @@
-"""Mô-đun client\ui\widgets\bubbles.py - mô tả ngắn bằng tiếng Việt."""
+
 
 import os
 import re 

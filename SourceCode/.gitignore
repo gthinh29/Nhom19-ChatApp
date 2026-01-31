@@ -1,0 +1,47 @@
+# Virtual Environments
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Database & Temporary Files
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+chatapp.db
+chatapp.db-wal
+chatapp.db-shm
+
+# Upload & Cache
+server/uploads/*
+!server/uploads/.gitkeep
+server/uploads/avatars/*
+!server/uploads/avatars/.gitkeep
+client/ui/__pycache__/
+client/controllers/__pycache__/
+client/network/__pycache__/
+server/__pycache__/
+server/controllers/__pycache__/
+common/__pycache__/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test & Temp
+*.log
+*.bak
+.cache/
+.pytest_cache/

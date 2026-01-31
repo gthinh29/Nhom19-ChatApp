@@ -1,4 +1,4 @@
-"""Mô-đun client\ui\widgets\toast.py - mô tả ngắn bằng tiếng Việt."""
+
 
 from PyQt6.QtWidgets import QLabel, QGraphicsDropShadowEffect
 from PyQt6.QtCore import Qt, QPropertyAnimation, QEasingCurve, QTimer, QPoint
